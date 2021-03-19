@@ -11,9 +11,7 @@ import { ENPS_PUBSUB_TOPICS, SlashCommand } from "./types";
 
 admin.initializeApp();
 
-// const bot = new WebClient(functions.config().slack.token);
 const pubSubClient = new PubSub();
-
 const validScoresRegex = /^((1[0-9])|([1-9]))$/;
 
 /**
@@ -111,7 +109,7 @@ export const postEndOfWeekReminderMessage = functions.pubsub
   .timeZone("America/New_York")
   .onRun(async (context) => {
     // Don't set channel to post to all channels
-    const dataStr = JSON.stringify({ all: true });
+    const dataStr = JSON.stringify({});
     const dataBuffer = Buffer.from(dataStr);
 
     await pubSubClient
@@ -128,7 +126,7 @@ export const postBeginningOfWeekScoreUpdate = functions.pubsub
   .timeZone("America/New_York")
   .onRun(async (context) => {
     // Don't set channel to post to all channels
-    const dataStr = JSON.stringify({ all: true });
+    const dataStr = JSON.stringify({});
     const dataBuffer = Buffer.from(dataStr);
     await pubSubClient
       .topic(ENPS_PUBSUB_TOPICS.PostResults)

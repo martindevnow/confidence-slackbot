@@ -18,9 +18,8 @@ interface WeekData {
 export const postResultsPubSub = functions.pubsub
   .topic(ENPS_PUBSUB_TOPICS.PostResults)
   .onPublish(async (message, context) => {
+    logIt(ENPS_PUBSUB_TOPICS.PostResults);
     const body = message.json as PostResultsMessage;
-
-    logIt(ENPS_PUBSUB_TOPICS.PostResults, body);
 
     const lastWeek = new Date(Date.now());
     lastWeek.setDate(lastWeek.getDate() - 5);
@@ -58,7 +57,9 @@ export const postResultsPubSub = functions.pubsub
 
         return bot.chat.postMessage({
           channel: simpleChannel.id,
-          text: `Last week, we received ${votes.length} scores, with an average score of ${average}`,
+          text: `Last week, we received ${votes.length} score${
+            votes.length > 1 ? "s" : ""
+          }, with an average score of ${average}`,
         });
       })
     );

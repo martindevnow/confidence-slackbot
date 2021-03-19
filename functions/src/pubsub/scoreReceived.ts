@@ -7,17 +7,21 @@ import { ENPS_PUBSUB_TOPICS, SlashCommand } from "../types";
 const db = admin.firestore();
 
 /**
- * Handle the Slash Commands in PubSub
+ * Handle the receipt of Scores via PubSub
  */
 export const scoreReceivedPubsub = functions.pubsub
   .topic(ENPS_PUBSUB_TOPICS.ScoreReceived)
   .onPublish(async (message, context) => {
+    logIt(ENPS_PUBSUB_TOPICS.ScoreReceived);
+
     const slashCommand = message.json as SlashCommand;
-
-    logIt(ENPS_PUBSUB_TOPICS.ScoreReceived, slashCommand);
     const score = +slashCommand.text;
-    const timestamp = Date.now().valueOf();
 
+    if (isNaN(score)) {
+      console.error("Score was NaN", "Text Received: ", slashCommand.text);
+      return;
+    }
+    const timestamp = Date.now().valueOf();
     const yearWeekKey = getYearWeekString(timestamp);
 
     await db
