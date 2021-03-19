@@ -6,7 +6,8 @@ import { PubSub } from "@google-cloud/pubsub";
 import admin from "firebase-admin";
 
 import { logIt } from "./utils";
-import { ENPS_PUBSUB_TOPICS, SlashCommand } from "./types";
+import { SlashCommand } from "./types";
+import { ENPS_PUBSUB_TOPICS } from "./constants";
 // import { legitSlackRequest } from "./verify";
 
 admin.initializeApp();
@@ -81,6 +82,11 @@ export const slackSlashCommand = functions.https.onRequest(async (req, res) => {
     return;
   }
 
+  if (commandArgument === "help") {
+    res.status(200).send(helpText);
+    return;
+  }
+
   if (validScoresRegex.test(commandArgument)) {
     const dataStr = JSON.stringify(command);
     const dataBuffer = Buffer.from(dataStr);
@@ -93,46 +99,13 @@ export const slackSlashCommand = functions.https.onRequest(async (req, res) => {
     return;
   }
 
-  res.status(200).send(helpText);
+  res.status(400).send("Unrecognized command: Try `/enps help` to learn more");
   return;
 });
-
-/**
- * Function to run weekly and remind channels
- * (where the app is installed)
- * to submit their eNPS scores for the week
- *
- * CRON :: `5 14 * * 5` = at 14:05 on Fridays
- */
-export const postEndOfWeekReminderMessage = functions.pubsub
-  .schedule("5 14 * * 5") // 2:05 PM on Fridays
-  .timeZone("America/New_York")
-  .onRun(async (context) => {
-    // Don't set channel to post to all channels
-    const dataStr = JSON.stringify({});
-    const dataBuffer = Buffer.from(dataStr);
-
-    await pubSubClient
-      .topic(ENPS_PUBSUB_TOPICS.PostReminder)
-      .publish(dataBuffer);
-  });
-
-/**
- * Function to run weekly and update channels
- * on what the eNPS score from the previous week was
- */
-export const postBeginningOfWeekScoreUpdate = functions.pubsub
-  .schedule("5 10 * * 2") // 10:05 AM on Tuesdays
-  .timeZone("America/New_York")
-  .onRun(async (context) => {
-    // Don't set channel to post to all channels
-    const dataStr = JSON.stringify({});
-    const dataBuffer = Buffer.from(dataStr);
-    await pubSubClient
-      .topic(ENPS_PUBSUB_TOPICS.PostResults)
-      .publish(dataBuffer);
-  });
 
 export * from "./pubsub/reminderMessage";
 export * from "./pubsub/resultsMessage";
 export * from "./pubsub/scoreReceived";
+
+export * from "./scheduled/beginningOfWeekResults";
+export * from "./scheduled/endOfWeekReminder";

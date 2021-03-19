@@ -2,7 +2,8 @@ import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
 import { getYearWeekString, logIt } from "../utils";
-import { ENPS_PUBSUB_TOPICS, SlashCommand } from "../types";
+import { SlashCommand } from "../types";
+import { ENPS_PUBSUB_TOPICS } from "../constants";
 
 const db = admin.firestore();
 

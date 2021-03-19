@@ -1,12 +1,10 @@
 import { WebClient } from "@slack/web-api";
 import * as functions from "firebase-functions";
-import {
-  ENPS_PUBSUB_TOPICS,
-  PostResultsMessage,
-  SimpleChannel,
-} from "../types";
-import { getMemberChannels, getYearWeekString, logIt } from "../utils";
 import admin from "firebase-admin";
+
+import { PostResultsMessage, SimpleChannel } from "../types";
+import { getMemberChannels, getYearWeekString, logIt } from "../utils";
+import { ENPS_PUBSUB_TOPICS } from "../constants";
 
 const bot = new WebClient(functions.config().slack.token);
 const db = admin.firestore();

@@ -1,11 +1,9 @@
 import { WebClient } from "@slack/web-api";
 import * as functions from "firebase-functions";
-import {
-  ENPS_PUBSUB_TOPICS,
-  PostReminderMessage,
-  SimpleChannel,
-} from "../types";
+
+import { PostReminderMessage, SimpleChannel } from "../types";
 import { getMemberChannels, logIt } from "../utils";
+import { ENPS_PUBSUB_TOPICS } from "../constants";
 
 const bot = new WebClient(functions.config().slack.token);
 
