@@ -11,6 +11,10 @@ import admin from "firebase-admin";
 const bot = new WebClient(functions.config().slack.token);
 const db = admin.firestore();
 
+interface WeekData {
+  [userId: string]: number;
+}
+
 export const postResultsPubSub = functions.pubsub
   .topic(ENPS_PUBSUB_TOPICS.PostResults)
   .onPublish(async (message, context) => {
@@ -37,11 +41,17 @@ export const postResultsPubSub = functions.pubsub
 
         const values = documentSnapshot.data();
 
-        const weeksData: { [user: string]: number } = values?.[lastWeekKey];
+        const weeksData: WeekData | undefined = values?.[lastWeekKey];
+        if (!weeksData) {
+          return bot.chat.postMessage({
+            channel: simpleChannel.id,
+            text: `Unfortunately, no eNPS scores were recorded last week. Don't forget to submit your scores this week!`,
+          });
+        }
+
         const votes = Object.values(weeksData);
         const average =
-          votes.reduce((acc: number, curr: number) => acc + curr, 0) /
-          votes.length;
+          votes.reduce((acc, curr) => acc + curr, 0) / votes.length;
         logIt("weeksData", weeksData);
         logIt("numVotes", votes.length);
         logIt("average", average);
