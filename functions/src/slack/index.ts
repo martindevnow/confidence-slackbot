@@ -84,18 +84,30 @@ const app = new App({
 app.error(console.error as any);
 
 // Handle `/echo` command invocations
-app.command("/enps2", async ({ command, ack, say }) => {
-  // Acknowledge command request
-  logIt("command");
-  logIt(command);
+app.command(
+  "/enps2",
+  async ({ command, ack, say, payload, client, context }) => {
+    // Acknowledge command request
+    logIt("=========================");
+    logIt("command");
+    logIt(command);
+    logIt("=========================");
+    logIt("payload");
+    logIt(payload);
+    logIt("=========================");
+    logIt("client");
+    logIt(client);
+    logIt("=========================");
+    logIt("context");
+    logIt(context);
+    await ack();
 
-  await ack();
-
-  // Requires:
-  // Add chat:write scope + invite the bot user to the channel you run this command
-  // Add chat:write.public + run this command in a public channel
-  await say(`You said "${command.text}"`);
-});
+    // Requires:
+    // Add chat:write scope + invite the bot user to the channel you run this command
+    // Add chat:write.public + run this command in a public channel
+    await say(`You said "${command.text}"`);
+  }
+);
 
 // https://{your domain}.cloudfunctions.net/slack/events
 export const slack = functions.https.onRequest(expressReceiver.app);
