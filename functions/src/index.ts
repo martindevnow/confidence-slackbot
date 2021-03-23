@@ -7,13 +7,12 @@ import admin from "firebase-admin";
 
 import { logIt } from "./utils";
 import { SlashCommand } from "./types";
-import { ENPS_PUBSUB_TOPICS } from "./constants";
+import { ENPS_PUBSUB_TOPICS, HELP_TEXT, VALID_SCORES_REGEX } from "./constants";
 // import { legitSlackRequest } from "./verify";
 
 admin.initializeApp();
 
 const pubSubClient = new PubSub();
-const validScoresRegex = /^((1[0-9])|([1-9]))$/;
 
 /**
  * Default function to validate with Slack
@@ -28,15 +27,6 @@ export const validateChallenge = functions.https.onRequest(async (req, res) => {
  */
 export const slackSlashCommand = functions.https.onRequest(async (req, res) => {
   logIt("slackSlashCommand Received ...");
-
-  const helpText = `**eNPS**
-  eNPS is an *Employee Net Promoter Score*. It asks one simple question.
-  
-  > On a scale from 1-10, how likely are you to recommend Thrillworks (our product) to your family and friends? 
-  
-  In your project slack channel, this bot can be added. This will allow your team to submit their scores on a regular basis.
-
-  Use the simple slack command: \`/enps #\` where \`#\` is a number from 1-10.`;
 
   // Commands
   // /enps help
@@ -83,11 +73,11 @@ export const slackSlashCommand = functions.https.onRequest(async (req, res) => {
   }
 
   if (commandArgument === "help") {
-    res.status(200).send(helpText);
+    res.status(200).send(HELP_TEXT);
     return;
   }
 
-  if (validScoresRegex.test(commandArgument)) {
+  if (VALID_SCORES_REGEX.test(commandArgument)) {
     const dataStr = JSON.stringify(command);
     const dataBuffer = Buffer.from(dataStr);
 

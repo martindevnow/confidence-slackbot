@@ -3,9 +3,17 @@ import admin from "firebase-admin";
 import { App, ExpressReceiver } from "@slack/bolt";
 
 import { logIt } from "../utils";
-import { SLACK_STATE_SECRET } from "../constants";
+import {
+  HELP_TEXT,
+  SLACK_STATE_SECRET,
+  VALID_SCORES_REGEX,
+} from "../constants";
+import { postReminder } from "./postReminder";
+import { postResults } from "./postResults";
+import { persistScore } from "./persistScore";
 
 const config = functions.config();
+// const pubSubClient = new PubSub();
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
 
@@ -55,6 +63,7 @@ const installationStore = {
     throw new Error("Failed fetching installation");
   },
 };
+
 const expressReceiver = new ExpressReceiver({
   clientId: config.slack.client_id,
   clientSecret: config.slack.client_secret,
@@ -85,27 +94,41 @@ app.error(console.error as any);
 
 // Handle `/echo` command invocations
 app.command(
-  "/enps2",
+  "/enps",
   async ({ command, ack, say, payload, client, context }) => {
-    // Acknowledge command request
-    logIt("=========================");
-    logIt("command");
-    logIt(command);
-    logIt("=========================");
-    logIt("payload");
-    logIt(payload);
-    logIt("=========================");
-    logIt("client");
-    logIt(client);
-    logIt("=========================");
-    logIt("context");
-    logIt(context);
-    await ack();
+    const commandArgument = command.text;
+    logIt("Command Argument", commandArgument);
 
-    // Requires:
-    // Add chat:write scope + invite the bot user to the channel you run this command
-    // Add chat:write.public + run this command in a public channel
-    await say(`You said "${command.text}"`);
+    if (commandArgument === "reminder") {
+      logIt("Dispatching PostReminder");
+      await ack("A reminder will be posted to the channel.");
+      const channel = { id: command.channel_id };
+      await postReminder({ client, channel });
+      return;
+    }
+
+    if (commandArgument === "results") {
+      logIt("Dispatching PostResults");
+      await ack("Last week's results will be posted to the channel.");
+      const channel = { id: command.channel_id, name: command.channel_name };
+      const team = { id: context.teamId };
+      await postResults({ db, channel, team, client });
+      return;
+    }
+
+    if (commandArgument === "help") {
+      return ack(HELP_TEXT);
+    }
+
+    if (VALID_SCORES_REGEX.test(commandArgument)) {
+      logIt("Dispatching ScoreReceived");
+      await ack("Thank you for submitting!");
+      const user = { id: command.user_id };
+      const channel = { name: command.channel_name };
+      const team = { id: context.teamId };
+      await persistScore({ db, text: command.text, user, channel, team });
+      return;
+    }
   }
 );
 

@@ -2,16 +2,12 @@ import { WebClient } from "@slack/web-api";
 import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 
-import { PostResultsMessage, SimpleChannel } from "../types";
+import { PostResultsMessage, SimpleChannel, WeekData } from "../types";
 import { getMemberChannels, getYearWeekString, logIt } from "../utils";
 import { ENPS_PUBSUB_TOPICS } from "../constants";
 
 const bot = new WebClient(functions.config().slack.token);
 const db = admin.firestore();
-
-interface WeekData {
-  [userId: string]: number;
-}
 
 export const postResultsPubSub = functions.pubsub
   .topic(ENPS_PUBSUB_TOPICS.PostResults)
