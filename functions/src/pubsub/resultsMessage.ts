@@ -29,6 +29,9 @@ export const postResultsPubSub = functions.pubsub
       ? await getMemberChannels(bot)
       : [body.channel];
 
+    // if channels.length === 1,
+    // then check if bot really is in that channel
+    // before posting
     await Promise.all(
       channels.map(async (simpleChannel: SimpleChannel) => {
         const documentSnapshot = await db

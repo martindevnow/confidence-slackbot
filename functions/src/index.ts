@@ -109,3 +109,5 @@ export * from "./pubsub/scoreReceived";
 
 export * from "./scheduled/beginningOfWeekResults";
 export * from "./scheduled/endOfWeekReminder";
+
+export * from "./slack/index";
