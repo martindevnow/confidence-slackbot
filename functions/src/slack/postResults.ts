@@ -5,7 +5,7 @@ import { getMemberChannels, getYearWeekString, logIt } from "../utils";
 
 interface Props {
   db: FirebaseFirestore.Firestore;
-  channel: { id: string; name: string };
+  channel?: { id: string; name: string };
   team: { id: string };
   client: WebClient;
 }
