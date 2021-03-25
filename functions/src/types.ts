@@ -122,3 +122,7 @@ export interface PostResultsMessage {
     name: string;
   };
 }
+
+export interface WeekData {
+  [userId: string]: number;
+}
