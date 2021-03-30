@@ -103,7 +103,8 @@ app.command(
       logIt("Dispatching PostReminder");
       await ack("A reminder will be posted to the channel.");
       const channel = { id: command.channel_id };
-      await postReminder({ client, channel });
+      const team = { id: context.teamId };
+      await postReminder({ client, channel, team });
       return;
     }
 

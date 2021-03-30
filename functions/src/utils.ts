@@ -12,7 +12,7 @@ export const logIt = (...args: any): void =>
  */
 export const getMemberChannels = async (slackBot: WebClient) => {
   const rooms = await slackBot.conversations.list({
-    types: "public_channel",
+    types: "public_channel,private_channel",
     exclude_archived: true,
   });
 

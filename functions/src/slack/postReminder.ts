@@ -4,7 +4,8 @@ import { getMemberChannels } from "../utils";
 
 interface Props {
   client: WebClient;
-  channel: { id: string };
+  channel?: { id: string };
+  team: { id: string };
 }
 
 const REMINDER = `It’s that time! Please submit your Team Confidence Rating! 
