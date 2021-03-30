@@ -22,3 +22,4 @@ export const validateChallenge = functions.https.onRequest(async (req, res) => {
  * This now handles the logic for the slack slash commands
  */
 export * from "./slack/index";
+export * from "./scheduled/beginningOfWeekResults";
