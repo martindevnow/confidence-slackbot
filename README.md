@@ -1,6 +1,6 @@
-# eNPS Slackbot
+# Confidence Rating Slackbot
 
-This is a slackbot that can be added to channels to make it easy to gather eNPS scores from your teams.
+This is a slackbot that can be added to channels to make it easy to gather confidence rating from your teams.
 
 ## Install
 
@@ -12,16 +12,20 @@ If there are issues with the above, visit here for the latest link:
 
 https://us-central1-enps-slack.cloudfunctions.net/slack/slack/install
 
+## Slash Command Webhook
+
+https://us-central1-enps-slack.cloudfunctions.net/slack/events
+
 ## Commands
 
 ```
-/enps help
+/conf help
+****
+/conf [1-9]
 
-/enps [1-10]
+/conf reminder
 
-/enps reminder
-
-/enps results
+/conf results
 ```
 
 ## Scopes

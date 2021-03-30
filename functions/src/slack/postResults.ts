@@ -10,6 +10,12 @@ interface Props {
   client: WebClient;
 }
 
+const NO_DATA_MESSAGE = `Not everyone’s Team Confidence Ratings were submitted last week. Don’t forget to submit your ratings this week!`;
+const MESSAGE = (responses: number, average: number) =>
+  `Last week, we received ${responses} rating${
+    responses > 1 ? "s" : ""
+  }, with an average rating of ${average}`;
+
 export const postResults = async ({ db, channel, team, client }: Props) => {
   const lastWeek = new Date(Date.now());
   lastWeek.setDate(lastWeek.getDate() - 5);
@@ -39,7 +45,7 @@ export const postResults = async ({ db, channel, team, client }: Props) => {
       if (!weeksData) {
         return client.chat.postMessage({
           channel: simpleChannel.id,
-          text: `Unfortunately, no eNPS scores were recorded last week. Don't forget to submit your scores this week!`,
+          text: NO_DATA_MESSAGE,
         });
       }
 
@@ -54,9 +60,7 @@ export const postResults = async ({ db, channel, team, client }: Props) => {
 
       return client.chat.postMessage({
         channel: simpleChannel.id,
-        text: `Last week, we received ${votes.length} score${
-          votes.length > 1 ? "s" : ""
-        }, with an average score of ${roundAverage}`,
+        text: MESSAGE(votes.length, roundAverage),
       });
     })
   );

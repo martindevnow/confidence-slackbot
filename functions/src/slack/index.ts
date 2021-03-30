@@ -94,7 +94,7 @@ app.error(console.error as any);
 
 // Handle `/echo` command invocations
 app.command(
-  "/enps",
+  "/conf",
   async ({ command, ack, say, payload, client, context }) => {
     const commandArgument = command.text;
     logIt("Command Argument", commandArgument);
@@ -129,6 +129,11 @@ app.command(
       await persistScore({ db, text: command.text, user, channel, team });
       return;
     }
+
+    await ack(
+      "I didn't recognize that input. Please check your submission or try `/conf help` for more."
+    );
+    return;
   }
 );
 
