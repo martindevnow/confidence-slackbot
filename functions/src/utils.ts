@@ -7,7 +7,6 @@ export const logIt = (...args: any): void =>
 
 interface Props {
   client: WebClient;
-  team: { id: string };
   bot: { id: string };
 }
 /**
@@ -16,30 +15,22 @@ interface Props {
  * @param client
  * @returns
  */
-export const getMemberChannels = async ({ client, team, bot }: Props) => {
-  // console.log("getMemberChannels");
-  // console.log({ bot, team });
-
+export const getMemberChannels = async ({ client, bot }: Props) => {
   try {
-    // const rooms = await client.users.conversations({
-    //   team_id: team.id,
-    //   user: bot.id,
-    //   types: "public_channel,private_channel",
-    //   exclude_archived: true,
-    // });
+    const rooms = (
+      await client.users.conversations({
+        user: bot.id,
+        types: "public_channel,private_channel",
+        exclude_archived: true,
+      })
+    ).channels as Array<SlackChannel>;
 
-    const rooms = await getAllRooms(client);
-
-    functions.logger.log("# of total rooms for this team: ", rooms.length);
-
-    const channels = rooms
-      .filter((channel) => channel.is_member)
-      .map(
-        ({ id, name }): SimpleChannel => ({
-          name,
-          id,
-        })
-      );
+    const channels = rooms.map(
+      ({ id, name }): SimpleChannel => ({
+        name,
+        id,
+      })
+    );
 
     functions.logger.log(`This bot belongs to ${channels.length} channel(s)`);
 
@@ -51,6 +42,8 @@ export const getMemberChannels = async ({ client, team, bot }: Props) => {
   }
 };
 
+// This might not be super useful anymore...
+// now that we can query specifically the rooms the bot is in
 const getAllRooms = async (
   client: WebClient,
   cursor?: string

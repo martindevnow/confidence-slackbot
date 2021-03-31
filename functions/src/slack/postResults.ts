@@ -31,12 +31,13 @@ export const postResults = async ({
   logIt("Last Week Key", lastWeekKey);
 
   const channels: SimpleChannel[] = !channel
-    ? await getMemberChannels({ client, team, bot })
+    ? await getMemberChannels({ client, bot })
     : [channel];
 
-  // if channels.length === 1,
+  // TODO: if channels.length === 1,
   // then check if client really is in that channel
   // before posting
+
   await Promise.all(
     channels.map(async (simpleChannel) => {
       const documentSnapshot = await db
@@ -59,11 +60,6 @@ export const postResults = async ({
       const votes = Object.values(weeksData);
       const average = votes.reduce((acc, curr) => acc + curr, 0) / votes.length;
       const roundAverage = Math.round(average * 10) / 10;
-
-      // logIt("weeksData", weeksData);
-      // logIt("numVotes", votes.length);
-      // logIt("average", average);
-      // logIt("roundAverage", roundAverage);
 
       return client.chat.postMessage({
         channel: simpleChannel.id,

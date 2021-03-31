@@ -102,13 +102,22 @@ app.command(
     functions.logger.info(context);
     logIt("Command Argument", commandArgument);
 
+    // This works. The `botUserId` is what we need to query channels for this user.
+    // if (commandArgument === "easterEgg") {
+    //   await ack("Just a moment...");
+    //   // const team = { id: context.teamId };
+    //   const bot = { id: context.botUserId };
+    //   await postReminder({ client, bot });
+    //   return;
+    // }
+
     if (commandArgument === "reminder") {
       logIt("Dispatching PostReminder");
       await ack("A reminder will be posted to the channel.");
       const channel = { id: command.channel_id };
-      const team = { id: context.teamId };
+      // const team = { id: context.teamId };
       const bot = { id: context.botUserId };
-      await postReminder({ client, channel, team, bot });
+      await postReminder({ client, channel, bot });
       return;
     }
 

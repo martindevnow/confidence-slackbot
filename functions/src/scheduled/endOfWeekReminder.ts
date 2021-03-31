@@ -28,10 +28,10 @@ export const postEndOfWeekReminderMessage = functions.pubsub
         functions.logger.log(`Posting results to workspace (name: ${name})`);
         const bot = { id: installation.bot.userId };
         const client = new WebClient(installation.bot.token);
-        const team = { id: installation.team.id };
-        functions.logger.log({ bot, team });
+        // const team = { id: installation.team.id };
+        // functions.logger.log({ bot });
 
-        await postReminder({ team, client, bot });
+        await postReminder({ client, bot });
       }
     });
   });
