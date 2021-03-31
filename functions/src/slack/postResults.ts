@@ -7,6 +7,7 @@ interface Props {
   db: FirebaseFirestore.Firestore;
   channel?: { id: string; name: string };
   team: { id: string };
+  bot: { id: string };
   client: WebClient;
 }
 
@@ -16,7 +17,13 @@ const MESSAGE = (responses: number, average: number) =>
     responses > 1 ? "s" : ""
   }, with an average rating of ${average}`;
 
-export const postResults = async ({ db, channel, team, client }: Props) => {
+export const postResults = async ({
+  db,
+  channel,
+  team,
+  client,
+  bot,
+}: Props) => {
   const lastWeek = new Date(Date.now());
   lastWeek.setDate(lastWeek.getDate() - 5);
 
@@ -24,7 +31,7 @@ export const postResults = async ({ db, channel, team, client }: Props) => {
   logIt("Last Week Key", lastWeekKey);
 
   const channels: SimpleChannel[] = !channel
-    ? await getMemberChannels(client)
+    ? await getMemberChannels({ client, team, bot })
     : [channel];
 
   // if channels.length === 1,

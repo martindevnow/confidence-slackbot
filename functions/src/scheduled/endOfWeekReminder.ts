@@ -15,8 +15,8 @@ const db = admin.firestore();
  * CRON :: `5 14 * * 5` = at 14:05 on Fridays
  */
 export const postEndOfWeekReminderMessage = functions.pubsub
-  .schedule("every 5 minutes")
-  // .schedule("5 14 * * 5") // 2:05 PM on Fridays
+  // .schedule("every 5 minutes")
+  .schedule("5 14 * * 5") // 2:05 PM on Fridays
   .timeZone("America/New_York")
   .onRun(async (context) => {
     const installations = await db.collection("teams").get();
@@ -24,10 +24,14 @@ export const postEndOfWeekReminderMessage = functions.pubsub
       const installation = querySnapshot.data() as Installation;
       if (installation.bot?.token && installation.team?.id) {
         const name = installation.team.name;
-        functions.logger.log(`Posting reminder to workspace (name: ${name})`);
+
+        functions.logger.log(`Posting results to workspace (name: ${name})`);
+        const bot = { id: installation.bot.userId };
         const client = new WebClient(installation.bot.token);
         const team = { id: installation.team.id };
-        await postReminder({ team, client });
+        functions.logger.log({ bot, team });
+
+        await postReminder({ team, client, bot });
       }
     });
   });

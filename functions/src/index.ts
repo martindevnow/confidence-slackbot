@@ -23,3 +23,4 @@ export const validateChallenge = functions.https.onRequest(async (req, res) => {
  */
 export * from "./slack/index";
 export * from "./scheduled/beginningOfWeekResults";
+export * from "./scheduled/endOfWeekReminder";

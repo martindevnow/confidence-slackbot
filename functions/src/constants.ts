@@ -4,6 +4,15 @@ export const ENPS_PUBSUB_TOPICS = {
   ScoreReceived: "ENPS-ScoreReceived",
 } as const;
 
+export const SLACK_SCOPES = [
+  "channels:history",
+  "channels:join",
+  "channels:read",
+  "chat:write",
+  "commands",
+  "groups:read",
+];
+
 export const SLACK_STATE_SECRET = "eNpsStateSecretThing";
 
 export const VALID_SCORES_REGEX = /^([1-9])$/;

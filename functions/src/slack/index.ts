@@ -5,6 +5,7 @@ import { App, ExpressReceiver } from "@slack/bolt";
 import { logIt } from "../utils";
 import {
   HELP_TEXT,
+  SLACK_SCOPES,
   SLACK_STATE_SECRET,
   VALID_SCORES_REGEX,
 } from "../constants";
@@ -12,7 +13,7 @@ import { postReminder } from "./postReminder";
 import { postResults } from "./postResults";
 import { persistScore } from "./persistScore";
 
-const config = functions.config();
+const CONFIG = functions.config();
 // const pubSubClient = new PubSub();
 const db = admin.firestore();
 db.settings({ ignoreUndefinedProperties: true });
@@ -65,11 +66,11 @@ const installationStore = {
 };
 
 const expressReceiver = new ExpressReceiver({
-  clientId: config.slack.client_id,
-  clientSecret: config.slack.client_secret,
+  clientId: CONFIG.slack.client_id,
+  clientSecret: CONFIG.slack.client_secret,
   endpoints: "/events", // instead of slack/events
-  scopes: ["channels:join", "channels:read", "chat:write", "commands"],
-  signingSecret: config.slack.signing_secret,
+  scopes: SLACK_SCOPES,
+  signingSecret: CONFIG.slack.signing_secret,
   stateSecret: SLACK_STATE_SECRET,
   processBeforeResponse: true,
   installationStore,
@@ -77,13 +78,13 @@ const expressReceiver = new ExpressReceiver({
 });
 
 const app = new App({
-  // token: config.slack.token, // disabled so this app can support multi-tenancy
-  signingSecret: config.slack.signing_secret,
+  // token: CONFIG.slack.token, // disabled so this app can support multi-tenancy
+  signingSecret: CONFIG.slack.signing_secret,
   processBeforeResponse: true,
-  clientId: config.slack.client_id,
-  clientSecret: config.slack.client_secret,
+  clientId: CONFIG.slack.client_id,
+  clientSecret: CONFIG.slack.client_secret,
   stateSecret: SLACK_STATE_SECRET,
-  scopes: ["channels:join", "channels:read", "chat:write", "commands"],
+  scopes: SLACK_SCOPES,
   installationStore,
   // logLevel: LogLevel.DEBUG,
   receiver: expressReceiver,
@@ -97,6 +98,8 @@ app.command(
   "/conf",
   async ({ command, ack, say, payload, client, context }) => {
     const commandArgument = command.text;
+    functions.logger.info("context");
+    functions.logger.info(context);
     logIt("Command Argument", commandArgument);
 
     if (commandArgument === "reminder") {
@@ -104,7 +107,8 @@ app.command(
       await ack("A reminder will be posted to the channel.");
       const channel = { id: command.channel_id };
       const team = { id: context.teamId };
-      await postReminder({ client, channel, team });
+      const bot = { id: context.botUserId };
+      await postReminder({ client, channel, team, bot });
       return;
     }
 
@@ -113,7 +117,8 @@ app.command(
       await ack("Last week's results will be posted to the channel.");
       const channel = { id: command.channel_id, name: command.channel_name };
       const team = { id: context.teamId };
-      await postResults({ db, channel, team, client });
+      const bot = { id: context.botUserId };
+      await postResults({ db, channel, team, client, bot });
       return;
     }
 

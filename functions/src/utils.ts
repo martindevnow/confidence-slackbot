@@ -1,31 +1,74 @@
+import * as functions from "firebase-functions";
 import { WebClient } from "@slack/web-api";
 import { SimpleChannel, SlackChannel } from "./types";
 
 export const logIt = (...args: any): void =>
   console.log(...args.map((arg: any) => JSON.stringify(arg)));
 
+interface Props {
+  client: WebClient;
+  team: { id: string };
+  bot: { id: string };
+}
 /**
  * Check which channels the bot is a member of
  *
- * @param slackBot
+ * @param client
  * @returns
  */
-export const getMemberChannels = async (slackBot: WebClient) => {
-  const rooms = await slackBot.conversations.list({
-    types: "public_channel,private_channel",
+export const getMemberChannels = async ({ client, team, bot }: Props) => {
+  // console.log("getMemberChannels");
+  // console.log({ bot, team });
+
+  try {
+    // const rooms = await client.users.conversations({
+    //   team_id: team.id,
+    //   user: bot.id,
+    //   types: "public_channel,private_channel",
+    //   exclude_archived: true,
+    // });
+
+    const rooms = await getAllRooms(client);
+
+    functions.logger.log("# of total rooms for this team: ", rooms.length);
+
+    const channels = rooms
+      .filter((channel) => channel.is_member)
+      .map(
+        ({ id, name }): SimpleChannel => ({
+          name,
+          id,
+        })
+      );
+
+    functions.logger.log(`This bot belongs to ${channels.length} channel(s)`);
+
+    return channels;
+  } catch (error) {
+    functions.logger.error("API Error with Slack Bot");
+    functions.logger.error(error);
+    return [];
+  }
+};
+
+const getAllRooms = async (
+  client: WebClient,
+  cursor?: string
+): Promise<Array<SlackChannel>> => {
+  const roomsReq = await client.conversations.list({
+    types: "public_channel,private_channel", // Can't seem to get this scope from Slack, even though it is selected in the UI
     exclude_archived: true,
+    ...(cursor ? { cursor } : {}),
   });
 
-  const channels = (rooms.channels as SlackChannel[])
-    .filter((channel) => channel.is_member)
-    .map(
-      ({ id, name }): SimpleChannel => ({
-        name,
-        id,
-      })
-    );
+  if (!roomsReq.response_metadata?.next_cursor) {
+    return roomsReq.channels as Array<SlackChannel>;
+  }
 
-  return channels;
+  return [
+    ...((roomsReq.channels as Array<SlackChannel>) || []),
+    ...(await getAllRooms(client, roomsReq.response_metadata.next_cursor)),
+  ];
 };
 
 /**
