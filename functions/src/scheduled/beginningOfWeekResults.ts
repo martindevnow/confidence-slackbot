@@ -13,7 +13,7 @@ const db = admin.firestore();
  */
 export const postBeginningOfWeekScoreUpdate = functions.pubsub
   // .schedule("every 5 minutes")
-  .schedule("5 10 * * 2") // 10:05 AM on Tuesdays (2nd day of the week)
+  .schedule("30 10 * * 1") // 10:30 AM on Monday (1st day of the week)
   .timeZone("America/New_York")
   .onRun(async (context) => {
     const installations = await db.collection("teams").get();
