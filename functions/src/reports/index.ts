@@ -1,6 +1,7 @@
 import * as functions from "firebase-functions";
 import admin from "firebase-admin";
 import { createHmac } from "crypto";
+import { Parser } from "json2csv";
 
 const db = admin.firestore();
 
@@ -12,6 +13,29 @@ interface ProjectData {
     [userId: string]: number;
   };
 }
+
+const fields = [
+  {
+    label: "Project",
+    value: "projectId",
+  },
+  {
+    label: "Year",
+    value: "year",
+  },
+  {
+    label: "Week",
+    value: "week",
+  },
+  {
+    label: "user",
+    value: "userId",
+  },
+  {
+    label: "ConfidenceRating",
+    value: "rating",
+  },
+];
 
 const flat = <T>(acc: Array<T>, curr: Array<T>) => acc.concat(curr);
 
@@ -40,6 +64,7 @@ export const reports = functions.https.onRequest(async (req, res) => {
   const apiToken = req.headers.authorization.split("Bearer ")[1];
 
   const companyId = req.query["company"];
+  const format = req.query["format"];
 
   const companyData = (await db.doc(`teams/${companyId}`).get()).data();
   if (!companyData?.reportsApiKey || companyData.reportsApiKey !== apiToken) {
@@ -75,5 +100,19 @@ export const reports = functions.https.onRequest(async (req, res) => {
     )
     .reduce(flat, []);
 
-  res.status(200).send({ data: projects });
+  if (format === "json") {
+    res.status(200).send({ data: projects });
+    return;
+  }
+
+  if (format === "csv") {
+    const json2csv = new Parser({ fields });
+    const csv = json2csv.parse(projects);
+    res.header("Content-Type", "text/csv");
+    res.attachment("confidence.csv");
+    res.send(csv);
+    return;
+  }
+
+  return;
 });
