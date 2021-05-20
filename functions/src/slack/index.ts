@@ -96,7 +96,7 @@ app.error(console.error as any);
 // Handle `/echo` command invocations
 app.command(
   "/conf",
-  async ({ command, ack, say, payload, client, context }) => {
+  async ({ command, ack, /*say, payload, */ client, context }) => {
     const commandArgument = command.text;
     functions.logger.info("context");
     functions.logger.info(context);

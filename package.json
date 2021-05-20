@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "build:func": "cd functions && yarn build",
+    "offline": "firebase emulators:start"
+  }
+}
