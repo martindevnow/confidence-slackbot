@@ -1,4 +1,4 @@
-import { getContractorName, isContractor } from "./helpers";
+import { getContractorName, getContractorScore, isContractor } from "./helpers";
 
 describe("slack-helpers", () => {
   describe("isContractor", () => {
@@ -14,7 +14,7 @@ describe("slack-helpers", () => {
     });
   });
 
-  describe("getContractor", () => {
+  describe("getContractorName", () => {
     it("works", () => {
       const commandArg = "contractor-marc 8";
 
@@ -25,6 +25,21 @@ describe("slack-helpers", () => {
       const commandArg = "contracddtor-marc 8";
 
       const actual = getContractorName(commandArg);
+      expect(actual).toBeUndefined();
+    });
+  });
+
+  describe("getContractorScore", () => {
+    it("works", () => {
+      const commandArg = "contractor-marc 8";
+
+      const actual = getContractorScore(commandArg);
+      expect(actual).toBe("8");
+    });
+    it("prevents badly formatted messages", () => {
+      const commandArg = "contracddtor-marc 8";
+
+      const actual = getContractorScore(commandArg);
       expect(actual).toBeUndefined();
     });
   });

@@ -12,7 +12,7 @@ import {
 import { postReminder } from "./postReminder";
 import { postResults } from "./postResults";
 import { persistScore } from "./persistScore";
-import { getContractorName, isContractor } from "./helpers";
+import { getContractorName, getContractorScore, isContractor } from "./helpers";
 
 const CONFIG = functions.config();
 // const pubSubClient = new PubSub();
@@ -140,10 +140,12 @@ app.command(
       logIt("Dispatching **Contractor** ScoreReceived");
       // Process as a contractor
       const name = getContractorName(commandArgument);
-      if (!name) {
+      const text = getContractorScore(commandArgument);
+      if (!name || !text) {
         logIt(
-          "Cannot read contractor name from command argument: ",
-          commandArgument
+          "Cannot read contractor name, or score from command argument: ",
+          commandArgument,
+          { name, text }
         );
         await ack(
           "Unable to parse name of the contractor. Please only use [a-zA-Z] with no symbols"
@@ -154,7 +156,7 @@ app.command(
       const user = { id: name };
       const channel = { name: command.channel_name };
       const team = { id: context.teamId };
-      await persistScore({ db, text: command.text, user, channel, team });
+      await persistScore({ db, text, user, channel, team });
       return;
     }
 
