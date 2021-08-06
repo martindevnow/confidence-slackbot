@@ -12,6 +12,7 @@ import {
 import { postReminder } from "./postReminder";
 import { postResults } from "./postResults";
 import { persistScore } from "./persistScore";
+import { getContractorName, isContractor } from "./helpers";
 
 const CONFIG = functions.config();
 // const pubSubClient = new PubSub();
@@ -133,6 +134,28 @@ app.command(
 
     if (commandArgument === "help") {
       return ack(HELP_TEXT);
+    }
+
+    if (isContractor(commandArgument)) {
+      logIt("Dispatching **Contractor** ScoreReceived");
+      // Process as a contractor
+      const name = getContractorName(commandArgument);
+      if (!name) {
+        logIt(
+          "Cannot read contractor name from command argument: ",
+          commandArgument
+        );
+        await ack(
+          "Unable to parse name of the contractor. Please only use [a-zA-Z] with no symbols"
+        );
+        return;
+      }
+      await ack("Thank you for submitting for your contractor!");
+      const user = { id: name };
+      const channel = { name: command.channel_name };
+      const team = { id: context.teamId };
+      await persistScore({ db, text: command.text, user, channel, team });
+      return;
     }
 
     if (VALID_SCORES_REGEX.test(commandArgument)) {
